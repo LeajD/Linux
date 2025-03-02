@@ -43,26 +43,34 @@ $ make isoimage FDARGS="initrd=/init.cpio" FDINITRD="our-custom-init-path.cpio"
 $ qemu-system-86_64 -cdrom arch/x86/boot/image.iso
 
 
----
+---     
 
 
-**sys.S**  
-   - This assembly file implements low-level system call wrappers.  
-   - It defines global symbols (write, read, execve, fork, real_waitid, _exit) that serve as entry points for invoking the corresponding Linux system calls using inline assembly (via the syscall instruction).  
-   - These wrappers provide a minimalistic interface for user-space programs to interact with the kernel (for I/O, process creation, execution, waiting on processes, and termination).
+# Explaination of syscalls, shell.c and sys.S:
 
-**shell.c**  
-   - This C source file implements a basic shell program.  
-   - It uses the system call wrappers defined in sys.S to perform core functions:
-     - **Input/Output:** The shell prints a prompt (using write) and reads a command from the user (using read).
-     - **Process Management:** For every command entered, it calls fork (to create a child process) and then execve (to replace the child’s image with a new executable based on the command).  
-     - **Waiting:** The parent process waits for the child process to complete using a custom wait function (real_waitid).  
-     - **Termination:** It finally calls _exit to cleanly exit the shell.
-     
+The **sys.S** file is an assembly source file that defines low-level wrappers for system calls. Here’s what it does and where it fits in the overall picture:
+
+1. **Purpose and Content:**  
+   - The file defines routines such as `write`, `read`, `execve`, `fork`, `real_waitid`, and `_exit`.  
+   - Each routine sets up the appropriate system call number (placed in register RAX) and then executes the `syscall` instruction. This instruction is the gateway from user mode to kernel mode.
+
+2. **Where It Goes:**  
+   - When you compile your custom Linux distribution (or a minimal user-space environment) that includes **sys.S** along with your other files (like **shell.c**), these assembly routines get assembled into object code and then linked into the final executable (for example, your shell program).
+   - They become part of your user-space binary, providing the means for the program to request services from the kernel.
+   - They do not get “installed” into the kernel image per se; rather, they are part of the user-level support library that interacts with the kernel.
+
+3. **Interaction with User/Kernel:**  
+   - When your shell (or any program using these routines) calls a function like `write`, it invokes the version defined in **sys.S**.  
+   - This function places the system call number in RAX (in this case, 1 for `write`), then executes the `syscall` instruction.  
+   - That instruction transfers control from user space to the kernel, which then processes the request (writing data in this example) and returns to user space.
+   - This mechanism ensures that even though your code is running in user space, it can safely request services (like I/O, process management, etc.) provided by the kernel.
+
+In summary, **sys.S** is part of your custom environment that implements the basic interface for making system calls. It’s compiled and linked into your user-space program and functions as the bridge for invoking kernel services via the `syscall` instruction.
 
 
 
-# Kenerl compilation process
+
+# Kernel compilation process
 - Compiler (GCC) -> converts C to Assembly 
 - Assembler -> converts Assembly to Machine code
 - Linker -> creates final kernel binary
@@ -73,4 +81,3 @@ $ qemu-system-86_64 -cdrom arch/x86/boot/image.iso
 # Kernel developing/debugging process
 - you can use "qemu" to virtualize custom kernel environment
 - you can then use "gdb" (GNU Debugger) in order to debug live custom-kernel environment and it's function (or test custom device drivers etc.) written in C (run "b $function" in order to change context inside gdb) 
-
