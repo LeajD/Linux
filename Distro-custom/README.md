@@ -18,7 +18,7 @@ $ as sys.C
 $ ld -o shell shell.o a.out --entry main -z noexecstack
 To debug shell:
 gdb ./shell
-7. Create CPIO archive of the init file (preparing initramfs (initial RAM filesystem) )
+7. Create CPIO archive of the init file 
 $ echo shell | cpio -H newc -o > init.cpio
 
 cd cloned/linux
@@ -42,6 +42,8 @@ go to directory with kernel code
 $ make isoimage FDARGS="initrd=/init.cpio" FDINITRD="our-custom-init-path.cpio"
 $ qemu-system-86_64 -cdrom arch/x86/boot/image.iso
 
+10. Run kernel with custom shell:
+$ qemu-system-x86_64 -kernel $PATH_TO_KERNEL -initrd $PATH_TO_INITRD
 
 ---     
 
@@ -65,7 +67,14 @@ The **sys.S** file is an assembly source file that defines low-level wrappers fo
    - That instruction transfers control from user space to the kernel, which then processes the request (writing data in this example) and returns to user space.
    - This mechanism ensures that even though your code is running in user space, it can safely request services (like I/O, process management, etc.) provided by the kernel.
 
-In summary, **sys.S** is part of your custom environment that implements the basic interface for making system calls. It’s compiled and linked into your user-space program and functions as the bridge for invoking kernel services via the `syscall` instruction.
+In summary, **sys.S** is part of your custom environment that implements the basic interface for making system calls. It’s compiled and linked into your user-space program and functions as the bridge for invoking kernel services via the `syscall` instruction
+
+# Initrd and CPIO:
+- initrd (Initial RAM Disk) is a temporary root filesystem loaded into memory during the early boot process. It helps the kernel initialize hardware and mount the real root filesystem
+- initramfs is built as a CPIO archive instead of a normal filesystem because:
+ 1) No Need for a Filesystem Driver – The kernel extracts CPIO directly into RAM.
+ 2) Lightweight & Flexible – CPIO stores files without extra metadata like inodes.
+ 3) Easier to Modify – Just cpio -o to repack, no need for loop mounting.
 
 
 
