@@ -6,11 +6,16 @@
 ![Linux filesystem structure](https://www.linuxfoundation.org/hubfs/Imported_Blog_Media/standard-unix-filesystem-hierarchy-1.png)
 
 
-1. Linux Hardening project
-2. Linux LVM&RAID project
-3. Linux Overview
-4. Linux kernel compilation
-5. Shell Scripting & Automation with cronjob project 
-6. Process Management & Monitoring projhect
-7.  list of 15 most useful cli tools for linux 
-8. linux logging/troubleshooting project
+Linux Hardening Best Practices:
+1. (access) Disable root login via SSH ; enforce strong passwords and MFA (sshd service)
+2. (access) Allow SSH access and set SSH trusted IPs restrictions (sshd service)
+3. Use firewall for traffic filtering (e.g. iptables)
+4. Disable not-required services and close open ports (netstat, systemctl)
+5. Regularly update system (package-manager update)
+6. Set proper permissions and ownership (chmod, chown, umask, setfacl)
+7. System/Kernel Hardening (enable SELinux/AppArmor)
+8. Logging and monitoring (rsyslog/journalctl)
+9. Create filesystem/os backups/snapshots
+10. Manage disks/partitions using RAID/LVM
+
+

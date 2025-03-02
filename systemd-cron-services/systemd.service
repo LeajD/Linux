@@ -1,0 +1,28 @@
+#you might want to implement such linux service for "jenkins runner" in order to run as agent for Jenkins server on remote EC2 to run as service and gets loaded during booting, monitoring over time etc.
+#/usr/lib/systemd/system/jenkins-runner.service
+[Unit]
+Description=Jenkins Runner Server
+Documentation=http://jenkins-ci.org
+After=network.target
+
+[Service]
+User=jenkins
+Group=jenkins
+ExecStart=/usr/bin/java -jar /opt/jenkins/agent.jar -jnlpUrl http://<JENKINS_MASTER_URL>/computer/<AGENT_NAME>/slave-agent.jnlp -secret <AGENT_SECRET>
+Restart=on-failure
+Environment="JENKINS_HOME=/var/lib/jenkins"
+WorkingDirectory=/var/lib/jenkins
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
+#systemctl is-failed $service
+
+#simple script to implement reading jenkins-runner service logs and send email alerts in case of errors
+#!/bin/bash
+journalctl -u jenkins-runner -f | grep -i "error" | while read line
+do
+    echo "$line" | mail -s "Service Error Alert" your_email@example.com
+done
