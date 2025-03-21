@@ -1,5 +1,6 @@
 # Linux
 
+Project based on: https://youtu.be/u2Juz5sQyYQ?si=Ly5NN8EkWiSixPW-
 
 # build your own Linux distro (custom kernel, shell, syscalls)
 1. download tar -> https://www.kernel.org/
